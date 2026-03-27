@@ -62,7 +62,7 @@ Design your room, place fixtures, create tile patterns on 12″×12″ sheets, a
 
 Open `index.html` in any modern browser. No install, no dependencies, no build step — it's a single self-contained HTML file.
 
-Or visit the hosted version: **[amiyah85.github.io/hexfloor-studio](https://amiyah85.github.io/Hex-tile-designer)**
+Or visit the hosted version: **[amiyah85.github.io/Hex-tile-designer](https://amiyah85.github.io/Hex-tile-designer)**
 
 ---
 
