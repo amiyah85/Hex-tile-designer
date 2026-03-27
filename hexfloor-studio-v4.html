@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HexFloor Studio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&family=Playfair+Display:wght@700;900&display=swap');
+  :root{--bg:#1a1a1e;--panel:#232328;--pb:#2e2e35;--text:#e8e6e1;--tm:#8a8890;--ac:#c9a86c;--ag:rgba(201,168,108,.15);--hov:#2a2a30;--dng:#d45050}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--pb);background:var(--panel);z-index:10;gap:10px}
+  .logo{font-family:'Playfair Display',serif;font-weight:900;font-size:18px;color:var(--ac);white-space:nowrap}.logo span{color:var(--tm);font-weight:700;font-size:12px;margin-left:6px}
+  .tabs{display:flex;gap:2px;background:var(--bg);padding:3px;border-radius:8px}
+  .tab{padding:5px 11px;border-radius:6px;border:none;background:0;color:var(--tm);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+  .tab:hover{color:var(--text)}.tab.active{background:var(--ac);color:#1a1a1e}.tab.disabled{opacity:.35;cursor:not-allowed}
+  .tab .n{width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.15);font-size:9px;display:flex;align-items:center;justify-content:center}
+  .acts{display:flex;gap:6px}
+  .btn{padding:6px 14px;border-radius:6px;border:1px solid var(--pb);background:var(--panel);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .btn:hover{border-color:var(--ac);background:var(--hov)}.btn.pri{background:var(--ac);color:#1a1a1e;border-color:var(--ac);font-weight:500}.btn.pri:hover{background:#d4b577}
+  .btn.dng{border-color:var(--dng);color:var(--dng)}.btn.dng:hover{background:rgba(212,80,80,.1)}
+  .ml{display:flex;flex:1;overflow:hidden}
+  .sb{width:264px;background:var(--panel);border-right:1px solid var(--pb);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+  .ss{padding:14px 16px;border-bottom:1px solid var(--pb)}
+  .sl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tm);margin-bottom:8px;font-weight:500}
+  .sb::-webkit-scrollbar{width:4px}.sb::-webkit-scrollbar-thumb{background:var(--pb);border-radius:2px}
+  .ca{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+  #cv{position:absolute;top:0;left:0;cursor:crosshair}
+  .oc{position:absolute;bottom:16px;right:16px;display:flex;gap:4px;z-index:5}
+  .ob{width:34px;height:34px;border-radius:8px;border:1px solid var(--pb);background:var(--panel);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s}.ob:hover{border-color:var(--ac)}
+  .ib{position:absolute;bottom:16px;left:16px;display:flex;gap:14px;font-size:11px;color:var(--tm);z-index:5;background:rgba(26,26,30,.9);padding:6px 12px;border-radius:6px;backdrop-filter:blur(8px)}
+  .tr{display:flex;gap:4px;flex-wrap:wrap}
+  .tb{width:38px;height:38px;border-radius:8px;border:1px solid var(--pb);background:0;color:var(--tm);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:15px}.tb:hover{border-color:var(--ac);color:var(--text)}.tb.a{border-color:var(--ac);background:var(--ag);color:var(--ac)}
+  .cg{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+  .cs{aspect-ratio:1;border-radius:5px;border:2px solid transparent;cursor:pointer;transition:all .15s}.cs:hover{transform:scale(1.15);z-index:1}.cs.a{border-color:#fff;box-shadow:0 0 0 2px var(--ac)}.cs.lb{border-color:rgba(255,255,255,.08)}.cs.lb.a{border-color:#fff}
+  .gg{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+  .gs{aspect-ratio:1;border-radius:5px;border:2px solid rgba(255,255,255,.06);cursor:pointer;transition:all .15s}.gs:hover{transform:scale(1.15);z-index:1}.gs.a{border-color:#fff;box-shadow:0 0 0 2px var(--ac)}
+  .scr{display:flex;gap:4px;align-items:center;margin-top:6px;flex-wrap:wrap;min-height:28px}
+  .ss2{width:26px;height:26px;border-radius:5px;border:2px solid transparent;cursor:pointer;transition:all .15s;position:relative;flex-shrink:0}.ss2:hover{transform:scale(1.15);z-index:1}.ss2.a{border-color:#fff;box-shadow:0 0 0 2px var(--ac)}
+  .ss2 .rx{position:absolute;top:-5px;right:-5px;width:13px;height:13px;border-radius:50%;background:var(--dng);color:#fff;font-size:8px;line-height:13px;text-align:center;display:none;cursor:pointer;z-index:2}.ss2:hover .rx{display:block}
+  .acb{width:26px;height:26px;border-radius:5px;border:1px dashed var(--pb);background:0;color:var(--tm);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}.acb:hover{border-color:var(--ac);color:var(--ac)}
+  .ccr{display:flex;gap:6px;align-items:center;margin-top:6px}.ccr input[type="color"]{width:26px;height:26px;border:none;background:none;cursor:pointer;border-radius:4px;flex-shrink:0}.ccr label{font-size:11px;color:var(--tm)}.ccr b{color:var(--ac)}
+  .hex-input{width:72px;padding:3px 6px;border-radius:4px;border:1px solid var(--pb);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:.5px}.hex-input:focus{outline:none;border-color:var(--ac)}
+  .pg{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+  .pc{padding:8px;border-radius:7px;border:1px solid var(--pb);background:0;color:var(--text);cursor:pointer;text-align:center;font-size:11px;transition:all .15s}.pc:hover{border-color:var(--ac);background:var(--hov)}.pc .icon{font-size:18px;margin-bottom:2px}
+  .go{display:flex;gap:3px}.gc{flex:1;padding:5px;border-radius:5px;border:1px solid var(--pb);background:0;color:var(--tm);cursor:pointer;text-align:center;font-size:11px;transition:all .15s}.gc:hover{border-color:var(--ac)}.gc.a{border-color:var(--ac);background:var(--ag);color:var(--ac)}
+  .fg{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+  .fc{padding:8px 6px;border-radius:7px;border:1px solid var(--pb);background:0;color:var(--text);cursor:pointer;text-align:center;font-size:11px;transition:all .15s}.fc:hover{border-color:var(--ac);background:var(--hov)}.fc .icon{font-size:18px;margin-bottom:2px}
+  .ht{font-size:11px;color:var(--tm);line-height:1.5;margin-top:4px}
+  .es{font-size:10px;color:var(--tm);font-style:italic;line-height:26px}
+  /* Border strip/corner designer grid */
+  .border-grid{display:inline-grid;gap:1px;background:rgba(255,255,255,.08);border-radius:4px;padding:1px;margin-top:6px}
+  .border-cell{width:22px;height:22px;border-radius:2px;cursor:pointer;transition:all .1s;border:1px solid transparent}
+  .border-cell:hover{border-color:var(--ac);transform:scale(1.1);z-index:1}
+  .border-cell.empty{background:rgba(255,255,255,.04)}
+  /* Toggle switch */
+  .toggle-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+  .toggle{width:36px;height:20px;border-radius:10px;background:var(--pb);cursor:pointer;position:relative;transition:all .2s;flex-shrink:0}
+  .toggle.on{background:var(--ac)}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:all .2s}
+  .toggle.on::after{left:18px}
+  .toggle-label{font-size:11px;color:var(--tm)}
+  .fixture-wrap-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px}
+  .fixture-wrap-badge.on{background:var(--ag);color:var(--ac);border:1px solid var(--ac)}
+  .fixture-wrap-badge.off{background:transparent;color:var(--tm);border:1px solid var(--pb)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">HexFloor<span>studio</span></div>
+  <div class="tabs">
+    <button class="tab active" id="t1" onclick="go('room')"><span class="n">1</span>Room</button>
+    <button class="tab disabled" id="t2" onclick="go('fixtures')"><span class="n">2</span>Fixtures</button>
+    <button class="tab disabled" id="t3" onclick="go('pattern')"><span class="n">3</span>Pattern</button>
+    <button class="tab disabled" id="t4" onclick="go('preview')"><span class="n">4</span>Preview</button>
+  </div>
+  <div class="acts">
+    <button class="btn" onclick="undo()">↩ Undo</button>
+    <button class="btn pri" onclick="exportImg()">⬇ Export</button>
+  </div>
+</header>
+<div class="ml">
+  <div class="sb" id="sb"></div>
+  <div class="ca" id="ca">
+    <canvas id="cv"></canvas>
+    <div class="oc">
+      <button class="ob" onclick="zi()">+</button>
+      <button class="ob" onclick="zo()">−</button>
+      <button class="ob" onclick="zf()" title="Fit">⊡</button>
+      <button class="ob" onclick="rv()">⟲</button>
+    </div>
+    <div class="ib" id="ib"></div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let P='room'; // phase
+let RP=[],RC=false,DP=null; // room points, closed, drawing preview
+let FX=[],DFX=null,DO={x:0,y:0},RFX=null,SFX=null,NFI=1; // fixtures
+const TC=['#f5f2eb','#ede8df','#e6dfd3','#ddd5c5','#d1c7b3','#c8bca4','#d5d3ce','#b8b5af','#9a9790','#7d7a74','#605d58','#45433f','#2c2b28','#1e1d1b','#131210','#0a0a09','#3a3835','#4d4a46','#6b1a1a','#7d2020','#8f2828','#5a1212','#4a0e0e','#982e2e','#2e5e4a','#3a6f58','#1e4a38','#4a8068','#163a2c','#5a9478','#1a3a6b','#243f6e','#1e3560','#2e4f80','#0f2848','#3a5f90','#c4a872','#b0935c','#9a7e48','#7a6235','#5e4a28','#453518'];
+const GC=[{c:'#f0ece4',n:'Bright white'},{c:'#e0dbd0',n:'Antique white'},{c:'#d0cabb',n:'Aged white'},{c:'#c0b9a8',n:'Light cement'},{c:'#a39d90',n:'Cement gray'},{c:'#8a847a',n:'Medium gray'},{c:'#6b665e',n:'Dark gray'},{c:'#4a4640',n:'Charcoal'},{c:'#2e2c28',n:'Near black'},{c:'#b8a88c',n:'Sand'},{c:'#9c8c72',n:'Warm tan'},{c:'#1a1a1e',n:'Black'}];
+let CC=TC[0],CT='paint';
+const HR=.5;
+let GW=.04,GColor='#a39d90',SVD=[];
+let SR=1,SC=1,SH=[]; const SS=12;
+let RH=[]; // room hex tiles
+
+// Border
+let BE=false; // enabled
+let BR=3; // border width in rows (=inches)
+let SRL=6; // strip repeat length
+let STRIP=[]; // [row][col] = color
+let CORNER=[]; // [row][col] = color
+let BEM='strip'; // edit mode: strip|corner
+
+// Pattern offset for preview (drag to reposition pattern origin)
+let patOffX=0, patOffY=0;
+let isDraggingPattern=false, patDragStartX=0, patDragStartY=0, patDragOrigX=0, patDragOrigY=0;
+
+// Room drawing: 90-degree angle snap
+let snapAngle=true;
+
+let Z=1,PX=0,PY=0,IP=false,IPT=false,PSX,PSY,SH_=false;
+let HIST=[];const MH=40;
+const PPI=4;
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+
+initBorder();
+
+// ═══════════════════════════════════════
+// BORDER INIT
+// ═══════════════════════════════════════
+function initBorder(){
+  STRIP=[];CORNER=[];
+  for(let r=0;r<BR;r++){STRIP[r]=[];for(let c=0;c<SRL;c++)STRIP[r][c]=null;}
+  for(let r=0;r<BR;r++){CORNER[r]=[];for(let c=0;c<BR;c++)CORNER[r][c]=null;}
+}
+function setBorderRows(n){
+  n=Math.max(1,Math.min(8,n));
+  const os=STRIP,oc=CORNER;BR=n;initBorder();
+  for(let r=0;r<BR;r++){if(os[r])for(let c=0;c<SRL;c++)STRIP[r][c]=os[r]?.[c]||null;if(oc[r])for(let c=0;c<BR;c++)CORNER[r][c]=oc[r]?.[c]||null;}
+  renderSB();draw();
+}
+function setStripLen(n){
+  n=Math.max(2,Math.min(24,n));const os=STRIP;SRL=n;
+  STRIP=[];for(let r=0;r<BR;r++){STRIP[r]=[];for(let c=0;c<SRL;c++)STRIP[r][c]=os[r]?.[c]||null;}
+  renderSB();draw();
+}
+
+// ═══════════════════════════════════════
+// PHASES
+// ═══════════════════════════════════════
+function go(p){
+  if(p!=='room'&&!RC)return;if(p==='pattern'&&!RC)return;
+  P=p;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  ({room:'t1',fixtures:'t2',pattern:'t3',preview:'t4'})[p]&&document.getElementById(({room:'t1',fixtures:'t2',pattern:'t3',preview:'t4'})[p]).classList.add('active');
+  if(p==='pattern'&&SH.length===0)buildSH();
+  if(p==='preview')buildRP();
+  renderSB();
+  setTimeout(()=>{if(p==='pattern')zfSheet();else if(p!=='room'||RC)zf();else draw();},30);
+}
+function en(id){document.getElementById(id).classList.remove('disabled');}
+
+// ═══════════════════════════════════════
+// COORDS
+// ═══════════════════════════════════════
+function w2c(wx,wy){return{x:wx*PPI*Z+PX+cv.width/2,y:wy*PPI*Z+PY+cv.height/2};}
+function c2w(cx,cy){return{x:(cx-PX-cv.width/2)/(PPI*Z),y:(cy-PY-cv.height/2)/(PPI*Z)};}
+function sn(v,c){const s=c?6:1;return Math.round(v/s)*s;}
+function h2w(q,r){return{x:HR*(1.5*q),y:HR*(Math.sqrt(3)/2*q+Math.sqrt(3)*r)};}
+function w2h(wx,wy){const q=(2/3*wx)/HR,r=(-1/3*wx+Math.sqrt(3)/3*wy)/HR,s=-q-r;let rq=Math.round(q),rr=Math.round(r),rs=Math.round(s);const dq=Math.abs(rq-q),dr=Math.abs(rr-r),ds=Math.abs(rs-s);if(dq>dr&&dq>ds)rq=-rr-rs;else if(dr>ds)rr=-rq-rs;return{q:rq,r:rr};}
+function ift(i){const f=Math.floor(i/12),n=Math.round(i%12);return f===0?`${n}"`:n===0?`${f}'`:`${f}'${n}"`;}
+function pArea(pts){let a=0;for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;a+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;}return Math.abs(a/2);}
+function pip(px,py,poly){let ins=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const xi=poly[i].x,yi=poly[i].y,xj=poly[j].x,yj=poly[j].y;if(((yi>py)!==(yj>py))&&(px<(xj-xi)*(py-yi)/(yj-yi)+xi))ins=!ins;}return ins;}
+function inR(px,py,r){return px>=r.x&&px<=r.x+r.w&&py>=r.y&&py<=r.y+r.h;}
+function lum(h){return .299*parseInt(h.slice(1,3),16)/255+.587*parseInt(h.slice(3,5),16)/255+.114*parseInt(h.slice(5,7),16)/255;}
+
+// ═══════════════════════════════════════
+// ROOM
+// ═══════════════════════════════════════
+function closeRoom(){if(RP.length<3)return;RC=true;en('t2');en('t3');en('t4');renderSB();setTimeout(()=>zf(),50);}
+function resetRoom(){RP=[];RC=false;FX=[];SH=[];RH=[];patOffX=0;patOffY=0;['t2','t3','t4'].forEach(id=>document.getElementById(id).classList.add('disabled'));go('room');}
+
+function quickRect(){
+  const input=prompt('Rectangle dimensions:\n\nEnter Width x Height (e.g. "5\'x8\'" or "60x96" in inches):','5\'x8\'');
+  if(!input)return;
+  function pd(s){s=s.trim();const m=s.match(/^(\d+)'\s*(\d*)"?$/);if(m)return parseInt(m[1])*12+(parseInt(m[2])||0);return parseFloat(s)||0;}
+  const pts=input.split(/[x×X]/);if(pts.length!==2)return;
+  const w=pd(pts[0]),h=pd(pts[1]);if(w<=0||h<=0)return;
+  saveH();RP=[{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];RC=true;
+  en('t2');en('t3');en('t4');renderSB();setTimeout(()=>zf(),50);
+}
+
+function quickLShape(){
+  const input=prompt('L-Shape dimensions:\n\nEnter as "OverallW x OverallH, CutoutW x CutoutH"\n(e.g. "10\'x8\', 5\'x4\'" — cutout from top-right corner):','10\'x8\', 5\'x4\'');
+  if(!input)return;
+  function pd(s){s=s.trim();const m=s.match(/^(\d+)'\s*(\d*)"?$/);if(m)return parseInt(m[1])*12+(parseInt(m[2])||0);return parseFloat(s)||0;}
+  const halves=input.split(',');if(halves.length!==2)return;
+  const outer=halves[0].split(/[x×X]/),cut=halves[1].split(/[x×X]/);
+  if(outer.length!==2||cut.length!==2)return;
+  const ow=pd(outer[0]),oh=pd(outer[1]),cw=pd(cut[0]),ch=pd(cut[1]);
+  if(ow<=0||oh<=0||cw<=0||ch<=0||cw>=ow||ch>=oh)return;
+  saveH();RP=[{x:0,y:0},{x:ow,y:0},{x:ow,y:oh-ch},{x:ow-cw,y:oh-ch},{x:ow-cw,y:oh},{x:0,y:oh}];RC=true;
+  en('t2');en('t3');en('t4');renderSB();setTimeout(()=>zf(),50);
+}
+
+// Snap point to 90 degrees relative to previous point
+function snapTo90(sx,sy){
+  if(!snapAngle||RP.length===0)return{x:sx,y:sy};
+  const last=RP[RP.length-1];
+  const dx=Math.abs(sx-last.x),dy=Math.abs(sy-last.y);
+  // If closer to horizontal, lock y; if closer to vertical, lock x
+  if(dx>=dy)return{x:sx,y:last.y};
+  else return{x:last.x,y:sy};
+}
+
+// ═══════════════════════════════════════
+// FIXTURES (now with borderWrap flag)
+// ═══════════════════════════════════════
+function addFix(type,w,h){let cx=0,cy=0;if(RP.length>0){RP.forEach(p=>{cx+=p.x;cy+=p.y});cx/=RP.length;cy/=RP.length;}FX.push({x:cx-w/2,y:cy-h/2,w,h,type,id:NFI++,borderWrap:false});renderSB();draw();}
+function rmFix(id){FX=FX.filter(f=>f.id!==id);if(SFX&&SFX.id===id)SFX=null;renderSB();draw();}
+function toggleBorderWrap(id){const f=FX.find(x=>x.id===id);if(f)f.borderWrap=!f.borderWrap;renderSB();draw();}
+function getFxAt(wx,wy){for(let i=FX.length-1;i>=0;i--)if(inR(wx,wy,FX[i]))return FX[i];return null;}
+function getFxH(wx,wy,f){const hs=3/Z;return(Math.abs(wx-(f.x+f.w))<hs&&Math.abs(wy-(f.y+f.h))<hs)?'br':null;}
+function editFxDim(f){const input=prompt(`Edit ${f.type}.\nCurrent: ${ift(f.w)}×${ift(f.h)}\n\nEnter WxH (e.g. "36x21"):`,`${Math.round(f.w)}x${Math.round(f.h)}`);if(!input)return;function pd(s){s=s.trim();const m=s.match(/^(\d+)'\s*(\d*)"?$/);if(m)return parseInt(m[1])*12+(parseInt(m[2])||0);return parseFloat(s)||0;}const pts=input.split(/[x×X]/);if(pts.length!==2)return;const nw=pd(pts[0]),nh=pd(pts[1]);if(nw<=0||nh<=0)return;saveH();f.w=nw;f.h=nh;renderSB();draw();}
+function editWall(i){const a=RP[i],b=RP[(i+1)%RP.length],ol=Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2);const input=prompt(`Wall ${i+1}: ${ift(ol)}\n\nNew length:`,`${Math.floor(ol/12)}'${Math.round(ol%12)}"`);if(!input)return;let nl=0;const m=input.match(/(\d+)'\s*(\d*)"?/);if(m)nl=parseInt(m[1])*12+(parseInt(m[2])||0);else nl=parseFloat(input);if(!nl||nl<=0)return;saveH();const dx=b.x-a.x,dy=b.y-a.y,cl=Math.sqrt(dx*dx+dy*dy);if(!cl)return;const sc=nl/cl;b.x=a.x+dx*sc;b.y=a.y+dy*sc;renderSB();draw();}
+function getWallAt(cx,cy){if(!RC||RP.length<3)return -1;const w=c2w(cx,cy);for(let i=0;i<RP.length;i++){const a=RP[i],b=RP[(i+1)%RP.length],dx=b.x-a.x,dy=b.y-a.y,ls=dx*dx+dy*dy;if(!ls)continue;let t=((w.x-a.x)*dx+(w.y-a.y)*dy)/ls;t=Math.max(0,Math.min(1,t));const px=a.x+t*dx,py=a.y+t*dy,d=Math.sqrt((w.x-px)**2+(w.y-py)**2);if(d<6/Z)return i;}return -1;}
+
+// ═══════════════════════════════════════
+// BORDER GEOMETRY
+// ═══════════════════════════════════════
+// Compute minimum distance from a point to the room walls AND to
+// border-wrapped fixture edges. This determines if a point is in the border zone.
+function distToPerimeter(wx,wy){
+  let minD=Infinity;
+  // Distance to each room wall segment
+  for(let i=0;i<RP.length;i++){const a=RP[i],b=RP[(i+1)%RP.length];minD=Math.min(minD,ptSegDist(wx,wy,a.x,a.y,b.x,b.y));}
+  // Distance to border-wrapped fixture edges
+  FX.forEach(f=>{if(!f.borderWrap)return;
+    const edges=[[f.x,f.y,f.x+f.w,f.y],[f.x+f.w,f.y,f.x+f.w,f.y+f.h],[f.x+f.w,f.y+f.h,f.x,f.y+f.h],[f.x,f.y+f.h,f.x,f.y]];
+    edges.forEach(([x1,y1,x2,y2])=>{minD=Math.min(minD,ptSegDist(wx,wy,x1,y1,x2,y2));});
+  });
+  return minD;
+}
+function ptSegDist(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;if(l2===0)return Math.sqrt((px-x1)**2+(py-y1)**2);let t=((px-x1)*dx+(py-y1)*dy)/l2;t=Math.max(0,Math.min(1,t));return Math.sqrt((px-(x1+t*dx))**2+(py-(y1+t*dy))**2);}
+
+// For each border-zone point, figure out its "row" (0=outermost) and "column along the wall"
+// by projecting onto the nearest wall/fixture edge
+function getBorderCoord(wx,wy){
+  let minD=Infinity,bestSeg=null,bestT=0;
+  // Check room walls
+  for(let i=0;i<RP.length;i++){
+    const a=RP[i],b=RP[(i+1)%RP.length];
+    const d=ptSegDist(wx,wy,a.x,a.y,b.x,b.y);
+    if(d<minD){minD=d;bestSeg={x1:a.x,y1:a.y,x2:b.x,y2:b.y};
+      const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;bestT=l2?((wx-a.x)*dx+(wy-a.y)*dy)/l2:0;bestT=Math.max(0,Math.min(1,bestT));}
+  }
+  // Check border-wrapped fixtures
+  FX.forEach(f=>{if(!f.borderWrap)return;
+    const edges=[[f.x,f.y,f.x+f.w,f.y],[f.x+f.w,f.y,f.x+f.w,f.y+f.h],[f.x+f.w,f.y+f.h,f.x,f.y+f.h],[f.x,f.y+f.h,f.x,f.y]];
+    edges.forEach(([x1,y1,x2,y2])=>{const d=ptSegDist(wx,wy,x1,y1,x2,y2);if(d<minD){minD=d;bestSeg={x1,y1,x2,y2};const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;bestT=l2?((wx-x1)*dx+(wy-y1)*dy)/l2:0;bestT=Math.max(0,Math.min(1,bestT));}});
+  });
+  const row=Math.floor(minD); // 0=touching wall, 1=1" in, etc
+  const segLen=bestSeg?Math.sqrt((bestSeg.x2-bestSeg.x1)**2+(bestSeg.y2-bestSeg.y1)**2):1;
+  const col=Math.floor(bestT*segLen); // position along the wall in inches
+  return{row:Math.min(row,BR-1),col};
+}
+
+// Check if a point is near a corner (room corner or fixture corner with borderWrap)
+function isNearCorner(wx,wy){
+  const thresh=BR; // corner block is BR x BR inches
+  for(let i=0;i<RP.length;i++){const p=RP[i];if(Math.abs(wx-p.x)<thresh&&Math.abs(wy-p.y)<thresh)return true;}
+  FX.forEach(f=>{if(!f.borderWrap)return;
+    [[f.x,f.y],[f.x+f.w,f.y],[f.x+f.w,f.y+f.h],[f.x,f.y+f.h]].forEach(([cx,cy])=>{
+      if(Math.abs(wx-cx)<thresh&&Math.abs(wy-cy)<thresh)return;// will be caught by dist check
+    });
+  });
+  return false;
+}
+
+// Get corner-relative coords for a point near a corner
+function getCornerCoord(wx,wy){
+  let minD=Infinity,bestC=null;
+  // Room corners
+  for(let i=0;i<RP.length;i++){const p=RP[i];const d=Math.sqrt((wx-p.x)**2+(wy-p.y)**2);if(d<minD){minD=d;bestC=p;}}
+  // Fixture corners
+  FX.forEach(f=>{if(!f.borderWrap)return;
+    [[f.x,f.y],[f.x+f.w,f.y],[f.x+f.w,f.y+f.h],[f.x,f.y+f.h]].forEach(([cx,cy])=>{const d=Math.sqrt((wx-cx)**2+(wy-cy)**2);if(d<minD){minD=d;bestC={x:cx,y:cy};}});
+  });
+  if(!bestC)return{row:0,col:0};
+  const dr=Math.abs(wy-bestC.y),dc=Math.abs(wx-bestC.x);
+  return{row:Math.min(Math.floor(dr),BR-1),col:Math.min(Math.floor(dc),BR-1)};
+}
+
+// ═══════════════════════════════════════
+// SHEET HEX GRID
+// ═══════════════════════════════════════
+function buildSH(){const old={};SH.forEach(h=>{old[`${h.q},${h.r}`]=h.color;});SH=[];const tw=SC*SS,th=SR*SS;const qn=Math.floor(((-HR)*2/3)/HR)-1,qx=Math.ceil(((tw+HR)*2/3)/HR)+1;for(let q=qn;q<=qx;q++){const yo=HR*(Math.sqrt(3)/2)*q;const rn=Math.floor(((-HR)-yo)/(HR*Math.sqrt(3)))-1,rx=Math.ceil(((th+HR)-yo)/(HR*Math.sqrt(3)))+1;for(let r=rn;r<=rx;r++){const{x,y}=h2w(q,r);if(x>=-HR&&x<=tw+HR&&y>=-HR&&y<=th+HR){SH.push({q,r,color:old[`${q},${r}`]||null});}}}}
+
+// ═══════════════════════════════════════
+// ROOM PREVIEW BUILD
+// ═══════════════════════════════════════
+function buildRP(){
+  RH=[];if(!RC)return;
+  const sm={};SH.forEach(h=>{sm[`${h.q},${h.r}`]=h.color;});
+  const rw=SC*SS,rh=SR*SS;
+  let mnX=Infinity,mxX=-Infinity,mnY=Infinity,mxY=-Infinity;
+  RP.forEach(p=>{if(p.x<mnX)mnX=p.x;if(p.x>mxX)mxX=p.x;if(p.y<mnY)mnY=p.y;if(p.y>mxY)mxY=p.y;});
+  const mg=HR*2,qn=Math.floor(((mnX-mg)*2/3)/HR)-1,qx=Math.ceil(((mxX+mg)*2/3)/HR)+1;
+  for(let q=qn;q<=qx;q++){const yo=HR*(Math.sqrt(3)/2)*q;const rn=Math.floor(((mnY-mg)-yo)/(HR*Math.sqrt(3)))-1,rx=Math.ceil(((mxY+mg)-yo)/(HR*Math.sqrt(3)))+1;
+    for(let r=rn;r<=rx;r++){const{x,y}=h2w(q,r);if(!pip(x,y,RP))continue;let bl=false;for(const f of FX)if(inR(x,y,f)){bl=true;break;}if(bl)continue;
+      // Check if in border zone
+      if(BE){
+        const d=distToPerimeter(x,y);
+        if(d<BR){
+          // This is a border tile — will be drawn as a square, skip hex
+          continue;
+        }
+      }
+      const wx=(((x-patOffX)%rw)+rw)%rw,wy=(((y-patOffY)%rh)+rh)%rh;
+      const mp=w2h(wx,wy);RH.push({q,r,color:sm[`${mp.q},${mp.r}`]||null});
+    }
+  }
+}
+
+// Build border square tiles for preview
+function buildBorderTiles(){
+  if(!BE||!RC)return[];
+  const tiles=[];
+  let mnX=Infinity,mxX=-Infinity,mnY=Infinity,mxY=-Infinity;
+  RP.forEach(p=>{if(p.x<mnX)mnX=p.x;if(p.x>mxX)mxX=p.x;if(p.y<mnY)mnY=p.y;if(p.y>mxY)mxY=p.y;});
+  // Iterate over 1" grid covering room
+  for(let ix=Math.floor(mnX);ix<=Math.ceil(mxX);ix++){
+    for(let iy=Math.floor(mnY);iy<=Math.ceil(mxY);iy++){
+      const wx=ix+.5,wy=iy+.5; // center of square tile
+      if(!pip(wx,wy,RP))continue;
+      let bl=false;for(const f of FX)if(inR(wx,wy,f)){bl=true;break;}if(bl)continue;
+      const d=distToPerimeter(wx,wy);
+      if(d>=BR)continue; // not in border zone
+      // Determine color from strip or corner
+      const bc=getBorderCoord(wx,wy);
+      const row=bc.row;
+      const col=bc.col%SRL;
+      // Check if near a corner — use corner block colors
+      let color=null;
+      const cc=getCornerCoord(wx,wy);
+      if(cc.row<BR&&cc.col<BR&&distToPerimeter(wx,wy)<BR*0.9){
+        // Check if truly in a corner zone (both row and col distance < BR from a corner)
+        let nearCorner=false;
+        for(const p of RP){if(Math.abs(wx-p.x)<BR&&Math.abs(wy-p.y)<BR){nearCorner=true;break;}}
+        FX.forEach(f=>{if(!f.borderWrap)return;[[f.x,f.y],[f.x+f.w,f.y],[f.x+f.w,f.y+f.h],[f.x,f.y+f.h]].forEach(([cx,cy])=>{if(Math.abs(wx-cx)<BR&&Math.abs(wy-cy)<BR)nearCorner=true;});});
+        if(nearCorner&&CORNER[cc.row]&&CORNER[cc.row][cc.col]!=null){
+          color=CORNER[cc.row][cc.col];
+        }
+      }
+      if(color===null){color=STRIP[row]?STRIP[row][col>=0?col:0]:null;}
+      tiles.push({x:ix,y:iy,color});
+    }
+  }
+  return tiles;
+}
+
+// ═══════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════
+function renderSB(){
+  const sb=document.getElementById('sb');
+  if(P==='room')sb.innerHTML=sbRoom();
+  else if(P==='fixtures')sb.innerHTML=sbFix();
+  else if(P==='pattern')sb.innerHTML=sbPat();
+  else sb.innerHTML=sbPrev();
+  if(P==='pattern'){buildCS();buildGS();renderSaved();buildBorderGrids();}
+  if(P==='preview')buildGS();
+}
+
+function sbRoom(){
+  let dims='';if(RP.length>=2)for(let i=0;i<RP.length;i++){const a=RP[i],b=RP[(i+1)%RP.length];if(i===RP.length-1&&!RC)break;dims+=`<div style="font-size:11px;margin:2px 0">Wall ${i+1}: <b>${ift(Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2))}</b></div>`;}
+  return `<div class="ss"><div class="sl">Quick Room Shapes</div>
+    <p class="ht">Enter dimensions and create instantly.</p>
+    <div style="display:flex;gap:4px;margin-top:6px">
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="quickRect()">▭ Rectangle</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="quickLShape()">⌐ L-Shape</button>
+    </div>
+  </div>
+  <div class="ss"><div class="sl">Freehand Draw</div>
+    <p class="ht">Click to place corners. Shift=6″ snap. Double-click wall to edit.</p>
+    <div class="toggle-row" style="margin-top:2px"><div class="toggle ${snapAngle?'on':''}" onclick="snapAngle=!snapAngle;renderSB()"></div><span class="toggle-label">Snap to 90° angles</span></div>
+    ${RP.length>=3&&!RC?`<button class="btn pri" style="margin-top:8px;width:100%;justify-content:center" onclick="closeRoom()">Close Room</button>`:''}
+    ${RC?`<button class="btn dng" style="margin-top:8px;width:100%;justify-content:center" onclick="resetRoom()">Reset</button>`:''}</div>
+    ${RP.length>=1?`<div class="ss"><div class="sl">Walls</div>${dims}${RC?`<div style="font-size:11px;color:var(--ac);margin-top:6px">Area: <b>${(pArea(RP)/144).toFixed(1)} sq ft</b></div>`:''}</div>`:''}`;
+}
+
+function sbFix(){
+  let list='';FX.forEach(f=>{list+=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 0;border-bottom:1px solid var(--pb)">
+    <span>${f.type} (${ift(f.w)}×${ift(f.h)})<span class="fixture-wrap-badge ${f.borderWrap?'on':'off'}" onclick="toggleBorderWrap(${f.id})" style="cursor:pointer">${f.borderWrap?'border':'no border'}</span></span>
+    <span style="color:var(--dng);cursor:pointer" onclick="rmFix(${f.id})">✕</span></div>`;});
+  return `<div class="ss"><div class="sl">Fixtures</div><p class="ht">Drag to move, double-click to edit size. Click the <b>border</b> badge to toggle whether the tile border wraps around that fixture.</p>
+    <div class="fg" style="margin-top:8px">
+      <button class="fc" onclick="addFix('Toilet',18,28)"><div class="icon">🚽</div>Toilet</button>
+      <button class="fc" onclick="addFix('Vanity',36,21)"><div class="icon">🪞</div>Vanity</button>
+      <button class="fc" onclick="addFix('Tub',60,30)"><div class="icon">🛁</div>Bathtub</button>
+      <button class="fc" onclick="addFix('Shower',36,36)"><div class="icon">🚿</div>Shower</button>
+      <button class="fc" onclick="addFix('Door',32,4)"><div class="icon">🚪</div>Doorway</button>
+      <button class="fc" onclick="addFix('Cabinet',36,24)"><div class="icon">🗄</div>Cabinet</button>
+      <button class="fc" onclick="addFix('Island',48,30)"><div class="icon">🏝</div>Island</button>
+      <button class="fc" onclick="addFix('Custom',24,24)"><div class="icon">▢</div>Custom</button>
+    </div></div>
+    ${FX.length?`<div class="ss"><div class="sl">Placed</div>${list}</div>`:''}
+    <div class="ss"><button class="btn pri" style="width:100%;justify-content:center" onclick="go('pattern')">→ Design Pattern</button></div>`;
+}
+
+function sbPat(){
+  return `<div class="ss"><div class="sl">Sheet Layout</div>
+    <p class="ht">12″×12″ sheets.</p>
+    <div style="display:flex;gap:4px;margin-top:6px">
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="setSh(1,1)">1×1</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="setSh(2,2)">2×2</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="setSh(3,3)">3×3</button>
+    </div>
+    <div style="font-size:11px;color:var(--tm);margin-top:4px">Current: ${SR}×${SC} (${SR*12}″×${SC*12}″)</div>
+  </div>
+  <div class="ss"><div class="sl">Hex Field Tools</div>
+    <div class="tr">
+      <button class="tb ${CT==='paint'?'a':''}" data-tool="paint" onclick="setT('paint')">🖌</button>
+      <button class="tb ${CT==='fill'?'a':''}" data-tool="fill" onclick="setT('fill')">🪣</button>
+      <button class="tb ${CT==='erase'?'a':''}" data-tool="erase" onclick="setT('erase')">✕</button>
+      <button class="tb ${CT==='eyedrop'?'a':''}" data-tool="eyedrop" onclick="setT('eyedrop')">💧</button>
+    </div>
+  </div>
+  <div class="ss"><div class="sl">Tile Colors · 1900–1950</div>
+    <div class="cg" id="cg"></div>
+    <div class="sl" style="margin-top:10px;margin-bottom:4px">Saved</div>
+    <div class="scr" id="scr"><span class="es" id="em">Pick + save below</span></div>
+    <div class="ccr"><input type="color" id="cc" value="${CC}" oninput="syncHexFromPicker()"><input type="text" class="hex-input" id="hexIn" value="${CC}" placeholder="#c9a86c" onchange="applyHexInput()" spellcheck="false"><button class="acb" onclick="saveC()" title="Save color">+</button></div>
+  </div>
+  <div class="ss"><div class="sl">Quick Patterns</div>
+    <div class="pg">
+      <button class="pc" onclick="applyP('checker')"><div class="icon">◇</div>Checker</button>
+      <button class="pc" onclick="applyP('stripes')"><div class="icon">≡</div>Stripes</button>
+      <button class="pc" onclick="applyP('random')"><div class="icon">⁂</div>Random</button>
+      <button class="pc" onclick="applyP('flower')"><div class="icon">✿</div>Flower</button>
+    </div>
+    <button class="btn" style="width:100%;justify-content:center;margin-top:6px" onclick="fillA()">⬡ Fill All</button>
+    <button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="clrA()">🗑 Clear</button>
+  </div>
+  <div class="ss"><div class="sl">Border · Square Tiles</div>
+    <div class="toggle-row"><div class="toggle ${BE?'on':''}" onclick="BE=!BE;renderSB();draw()"></div><span class="toggle-label">${BE?'Border enabled':'Border disabled'}</span></div>
+    ${BE?`
+    <div style="margin-top:8px"><span style="font-size:11px;color:var(--tm)">Width: ${BR} rows (${BR}″)</span>
+      <input type="range" min="1" max="8" value="${BR}" style="width:100%;accent-color:var(--ac)" onchange="setBorderRows(+this.value)"></div>
+    <div style="margin-top:6px"><span style="font-size:11px;color:var(--tm)">Strip repeat: ${SRL} tiles</span>
+      <input type="range" min="2" max="24" value="${SRL}" style="width:100%;accent-color:var(--ac)" onchange="setStripLen(+this.value)"></div>
+    <div style="margin-top:8px">
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        <button class="btn ${BEM==='strip'?'pri':''}" style="flex:1;justify-content:center;font-size:11px" onclick="BEM='strip';renderSB()">Strip</button>
+        <button class="btn ${BEM==='corner'?'pri':''}" style="flex:1;justify-content:center;font-size:11px" onclick="BEM='corner';renderSB()">Corner</button>
+      </div>
+      <p class="ht">${BEM==='strip'?'Paint the repeating border strip cross-section. Rows: outside→inside. Cols: repeat unit.':'Paint the corner block. This goes at every turn.'}</p>
+      <div id="borderDesigner"></div>
+    </div>
+    `:''}
+  </div>
+  <div class="ss"><div class="sl">Grout</div>
+    <div class="go">
+      <button class="gc ${GW<=.01?'a':''}" data-grout="none" onclick="setG('none')">None</button>
+      <button class="gc ${GW===.04?'a':''}" data-grout="thin" onclick="setG('thin')">Thin</button>
+      <button class="gc ${GW===.08?'a':''}" data-grout="medium" onclick="setG('medium')">Medium</button>
+      <button class="gc ${GW===.125?'a':''}" data-grout="thick" onclick="setG('thick')">Thick</button>
+    </div>
+    <div class="sl" style="margin-top:10px">Grout Color</div>
+    <div class="gg" id="gg"></div>
+    <div class="ccr" style="margin-top:6px"><input type="color" id="gp" value="${GColor}" onchange="setGC(this.value)"><label>Custom</label></div>
+  </div>
+  <div class="ss"><button class="btn pri" style="width:100%;justify-content:center" onclick="go('preview')">→ Preview in Room</button></div>`;
+}
+
+function sbPrev(){
+  return `<div class="ss"><div class="sl">Room Preview</div>
+    <p class="ht">Your pattern tiled across the room. Zoom in for detail.</p>
+    <div style="font-size:12px;margin-top:8px">Hex tiles: <b>${RH.length.toLocaleString()}</b></div>
+    ${BE?`<div style="font-size:12px;margin-top:2px">Border: <b>${BR}″ wide</b> · square tiles</div>`:''}
+    <button class="btn" style="width:100%;justify-content:center;margin-top:8px" onclick="go('pattern')">← Edit Pattern</button>
+    <button class="btn" style="width:100%;justify-content:center;margin-top:4px" onclick="zf()">⊡ Zoom to Fit</button>
+  </div>
+  <div class="ss"><div class="sl">Pattern Alignment</div>
+    <p class="ht">Shift+drag on the canvas to slide the pattern. Or nudge with buttons:</p>
+    <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="nudgePat(-1,0)">← 1″</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="nudgePat(1,0)">→ 1″</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="nudgePat(0,-1)">↑ 1″</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="nudgePat(0,1)">↓ 1″</button>
+    </div>
+    <div style="display:flex;gap:4px;margin-top:4px">
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="nudgePat(-6,0)">← 6″</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="nudgePat(6,0)">→ 6″</button>
+      <button class="btn" style="flex:1;justify-content:center;font-size:11px" onclick="patOffX=0;patOffY=0;buildRP();draw();renderSB()">Reset</button>
+    </div>
+    <div style="font-size:10px;color:var(--tm);margin-top:4px">Offset: ${patOffX.toFixed(1)}″ × ${patOffY.toFixed(1)}″</div>
+  </div>
+  <div class="ss"><div class="sl">Grout Color</div>
+    <div class="gg" id="gg"></div>
+    <div class="ccr" style="margin-top:6px"><input type="color" id="gp" value="${GColor}" onchange="setGC(this.value)"><label>Custom</label></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// BORDER DESIGNER GRIDS
+// ═══════════════════════════════════════
+function buildBorderGrids(){
+  const el=document.getElementById('borderDesigner');if(!el||!BE)return;
+  const grid=BEM==='strip'?STRIP:CORNER;
+  const cols=BEM==='strip'?SRL:BR;
+  const rows=BR;
+  let html=`<div class="border-grid" style="grid-template-columns:repeat(${cols},22px)">`;
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const color=grid[r]?.[c];
+      const bg=color||'';
+      html+=`<div class="border-cell ${color?'':'empty'}" style="${color?'background:'+color:''}" onclick="paintBorderCell(${r},${c})" oncontextmenu="eraseBorderCell(event,${r},${c})"></div>`;
+    }
+  }
+  html+='</div>';
+  html+=`<p class="ht" style="margin-top:4px">Click to paint · Right-click to erase</p>`;
+  el.innerHTML=html;
+}
+function paintBorderCell(r,c){
+  const grid=BEM==='strip'?STRIP:CORNER;
+  if(grid[r])grid[r][c]=CC;
+  buildBorderGrids();draw();
+}
+function eraseBorderCell(e,r,c){
+  e.preventDefault();
+  const grid=BEM==='strip'?STRIP:CORNER;
+  if(grid[r])grid[r][c]=null;
+  buildBorderGrids();draw();
+}
+
+// ═══════════════════════════════════════
+// SWATCHES
+// ═══════════════════════════════════════
+function buildCS(){const g=document.getElementById('cg');if(!g)return;TC.forEach(c=>{const e=document.createElement('div');e.className='cs'+(c===CC?' a':'');if(lum(c)>.7)e.classList.add('lb');e.style.background=c;e.onclick=()=>selC(c);e.dataset.color=c;g.appendChild(e);});}
+function buildGS(){const g=document.getElementById('gg');if(!g)return;GC.forEach(gc=>{const e=document.createElement('div');e.className='gs'+(gc.c===GColor?' a':'');e.style.background=gc.c;e.title=gc.n;e.dataset.color=gc.c;e.onclick=()=>{setGC(gc.c);const p=document.getElementById('gp');if(p)p.value=gc.c;};g.appendChild(e);});}
+function selC(c){CC=c;document.querySelectorAll('.cs,.ss2').forEach(s=>s.classList.toggle('a',s.dataset.color===c));}
+function saveC(){const p=document.getElementById('cc');if(!p)return;const c=p.value;if(SVD.includes(c)||TC.includes(c))return;if(SVD.length>=12)SVD.shift();SVD.push(c);CC=c;renderSaved();}
+function syncHexFromPicker(){const p=document.getElementById('cc');const h=document.getElementById('hexIn');if(p&&h){h.value=p.value;CC=p.value;selC(CC);}}
+function applyHexInput(){const h=document.getElementById('hexIn');const p=document.getElementById('cc');if(!h)return;let v=h.value.trim();if(!v.startsWith('#'))v='#'+v;if(/^#[0-9a-fA-F]{6}$/.test(v)){CC=v;if(p)p.value=v;h.value=v;selC(CC);}else{h.value=CC;}}
+function rmSaved(i,e){e.stopPropagation();SVD.splice(i,1);renderSaved();}
+function renderSaved(){const row=document.getElementById('scr');if(!row)return;const em=document.getElementById('em');row.querySelectorAll('.ss2').forEach(e=>e.remove());if(!SVD.length){if(em)em.style.display='';}else{if(em)em.style.display='none';}SVD.forEach((c,i)=>{const e=document.createElement('div');e.className='ss2'+(c===CC?' a':'');e.style.background=c;e.dataset.color=c;e.onclick=()=>selC(c);const x=document.createElement('div');x.className='rx';x.textContent='×';x.onclick=ev=>rmSaved(i,ev);e.appendChild(x);row.appendChild(e);});}
+
+// ═══════════════════════════════════════
+// TOOLS
+// ═══════════════════════════════════════
+function setT(t){CT=t;document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('a',b.dataset.tool===t));}
+function setG(g){GW={none:0,thin:.04,medium:.08,thick:.125}[g];document.querySelectorAll('.gc').forEach(c=>c.classList.toggle('a',c.dataset.grout===g));draw();}
+function setGC(c){GColor=c;document.querySelectorAll('.gs').forEach(s=>s.classList.toggle('a',s.dataset.color===c));draw();}
+function setSh(r,c){SR=r;SC=c;buildSH();renderSB();setTimeout(()=>zfSheet(),30);}
+function fillA(){saveH();SH.forEach(h=>h.color=CC);draw();}
+function clrA(){saveH();SH.forEach(h=>h.color=null);draw();}
+function getSHAt(cx,cy){const w=c2w(cx,cy);const{q,r}=w2h(w.x,w.y);return SH.find(h=>h.q===q&&h.r===r);}
+function paintSH(hex){if(!hex)return;if(CT==='paint')hex.color=CC;else if(CT==='erase')hex.color=null;else if(CT==='eyedrop'&&hex.color){CC=hex.color;document.querySelectorAll('.cs,.ss2').forEach(s=>s.classList.toggle('a',s.dataset.color===hex.color));}else if(CT==='fill'){if(hex.color===CC)return;ff(hex.q,hex.r,hex.color,CC,SH);}draw();}
+function ff(sq,sr,tgt,fil,arr){const m={};arr.forEach(h=>{m[`${h.q},${h.r}`]=h;});const st=[`${sq},${sr}`],v=new Set(),dirs=[[1,0],[-1,0],[0,1],[0,-1],[1,-1],[-1,1]];while(st.length){const k=st.pop();if(v.has(k))continue;v.add(k);const h=m[k];if(!h||h.color!==tgt)continue;h.color=fil;const[q,r]=k.split(',').map(Number);dirs.forEach(([dq,dr])=>st.push(`${q+dq},${r+dr}`));}}
+function applyP(type){saveH();const pal=[CC,TC[0],TC[6],TC[12],TC[18]];SH.forEach(h=>{const{q,r}=h,s=-q-r;switch(type){case'checker':h.color=((q+r)%2===0)?pal[0]:pal[1];break;case'stripes':h.color=pal[((q%pal.length)+pal.length)%pal.length];break;case'random':h.color=pal[Math.floor(Math.random()*pal.length)];break;case'flower':{const d=Math.max(Math.abs(q),Math.abs(r),Math.abs(s));h.color=d===0?pal[0]:d%3===0?pal[1]:d%3===1?pal[2]:pal[3];break;}}});draw();}
+
+// ═══════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════
+function saveH(){HIST.push(JSON.stringify({rp:RP,rc:RC,fx:FX,sh:SH.map(h=>({q:h.q,r:h.r,c:h.color})),sr:SR,sc:SC,be:BE,br:BR,srl:SRL,strip:STRIP,corner:CORNER}));if(HIST.length>MH)HIST.shift();}
+function undo(){if(!HIST.length)return;const s=JSON.parse(HIST.pop());RP=s.rp;RC=s.rc;FX=s.fx;SR=s.sr;SC=s.sc;BE=s.be;BR=s.br;SRL=s.srl;STRIP=s.strip;CORNER=s.corner;const m={};s.sh.forEach(h=>{m[`${h.q},${h.r}`]=h.c;});SH.forEach(h=>{h.color=m[`${h.q},${h.r}`]||null;});if(!RC){['t2','t3','t4'].forEach(id=>document.getElementById(id).classList.add('disabled'));if(P!=='room')go('room');else{renderSB();draw();}}else{en('t2');en('t3');en('t4');renderSB();draw();}}
+
+// ═══════════════════════════════════════
+// DRAWING
+// ═══════════════════════════════════════
+function draw(){
+  cx.clearRect(0,0,cv.width,cv.height);cx.fillStyle='#1e1e22';cx.fillRect(0,0,cv.width,cv.height);
+  if(P==='room'||P==='fixtures'){drawGrid();if(RC)drawRF('rgba(201,168,108,.06)');drawFx();drawRO();if(RP.length>=2)drawDm();}
+  else if(P==='pattern'){drawSBg();drawHx(SH);drawSG();}
+  else if(P==='preview'){drawRF(GColor);drawBorderTiles();drawHx(RH);drawFx();drawRO();if(RP.length>=2)drawDm();}
+  updI();
+}
+function drawGrid(){const step=6,cx2=cv.width/2+PX,cy2=cv.height/2+PY,wl=-cx2/(PPI*Z),wr=(cv.width-cx2)/(PPI*Z),wt=-cy2/(PPI*Z),wb=(cv.height-cy2)/(PPI*Z);cx.strokeStyle='rgba(255,255,255,.04)';cx.lineWidth=1;for(let x=Math.floor(wl/step)*step;x<=Math.ceil(wr/step)*step;x+=step){const sx=w2c(x,0).x;cx.beginPath();cx.moveTo(sx,0);cx.lineTo(sx,cv.height);cx.stroke();}for(let y=Math.floor(wt/step)*step;y<=Math.ceil(wb/step)*step;y+=step){const sy=w2c(0,y).y;cx.beginPath();cx.moveTo(0,sy);cx.lineTo(cv.width,sy);cx.stroke();}}
+function drawRF(color){if(!RC)return;cx.beginPath();const f=w2c(RP[0].x,RP[0].y);cx.moveTo(f.x,f.y);for(let i=1;i<RP.length;i++){const p=w2c(RP[i].x,RP[i].y);cx.lineTo(p.x,p.y);}cx.closePath();cx.fillStyle=color;cx.fill();}
+function drawRO(){if(!RP.length)return;cx.lineWidth=2;cx.strokeStyle=RC?'#c9a86c':'#7a8a94';cx.beginPath();const p0=w2c(RP[0].x,RP[0].y);cx.moveTo(p0.x,p0.y);for(let i=1;i<RP.length;i++){const p=w2c(RP[i].x,RP[i].y);cx.lineTo(p.x,p.y);}if(RC)cx.closePath();else if(DP){const pp=w2c(DP.x,DP.y);cx.lineTo(pp.x,pp.y);}cx.stroke();
+  if(!RC&&DP&&RP.length>=1){const last=RP[RP.length-1],len=Math.sqrt((DP.x-last.x)**2+(DP.y-last.y)**2);if(len>1){const sa=w2c(last.x,last.y),sb=w2c(DP.x,DP.y),mx=(sa.x+sb.x)/2,my=(sa.y+sb.y)/2,dx=sb.x-sa.x,dy=sb.y-sa.y,nl=Math.sqrt(dx*dx+dy*dy),nx=-dy/nl*20,ny=dx/nl*20,txt=ift(len);cx.font='bold 12px DM Sans';const tw=cx.measureText(txt).width+12;cx.fillStyle='rgba(201,168,108,.9)';cx.beginPath();cx.roundRect(mx+nx-tw/2,my+ny-10,tw,20,4);cx.fill();cx.fillStyle='#1a1a1e';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(txt,mx+nx,my+ny);}}
+  RP.forEach((p,i)=>{const sp=w2c(p.x,p.y);cx.beginPath();cx.arc(sp.x,sp.y,i===0?6:4,0,Math.PI*2);cx.fillStyle=i===0?'#c9a86c':'#e8e6e1';cx.fill();if(i===0&&!RC&&RP.length>=3){cx.strokeStyle='#c9a86c';cx.lineWidth=2;cx.beginPath();cx.arc(sp.x,sp.y,10,0,Math.PI*2);cx.stroke();}});}
+function drawDm(){cx.font='11px DM Sans';cx.textAlign='center';cx.textBaseline='bottom';for(let i=0;i<RP.length;i++){const a=RP[i],b=RP[(i+1)%RP.length];if(i===RP.length-1&&!RC)break;const len=Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2);if(len<2)continue;const sa=w2c(a.x,a.y),sb=w2c(b.x,b.y),mx=(sa.x+sb.x)/2,my=(sa.y+sb.y)/2,dx=sb.x-sa.x,dy=sb.y-sa.y,nl=Math.sqrt(dx*dx+dy*dy),nx=-dy/nl*16,ny=dx/nl*16,txt=ift(len),tw=cx.measureText(txt).width+8;cx.fillStyle='rgba(26,26,30,.85)';cx.fillRect(mx+nx-tw/2,my+ny-14,tw,16);cx.fillStyle='#c9a86c';cx.fillText(txt,mx+nx,my+ny);}}
+function drawFx(){FX.forEach(f=>{const tl=w2c(f.x,f.y),br=w2c(f.x+f.w,f.y+f.h),w=br.x-tl.x,h=br.y-tl.y;cx.fillStyle=P==='preview'?'rgba(60,60,65,.9)':'rgba(100,100,110,.3)';cx.fillRect(tl.x,tl.y,w,h);const isSel=SFX&&SFX.id===f.id;cx.strokeStyle=isSel?'#c9a86c':f.borderWrap?'rgba(201,168,108,.4)':'rgba(200,200,200,.3)';cx.lineWidth=isSel?2:1;if(f.borderWrap){cx.setLineDash([4,3]);cx.strokeRect(tl.x,tl.y,w,h);cx.setLineDash([]);}else cx.strokeRect(tl.x,tl.y,w,h);cx.fillStyle='rgba(255,255,255,.5)';cx.font='10px DM Sans';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(f.type,tl.x+w/2,tl.y+h/2-6);cx.font='9px DM Sans';cx.fillStyle='rgba(255,255,255,.35)';cx.fillText(`${ift(f.w)}×${ift(f.h)}`,tl.x+w/2,tl.y+h/2+6);if(P==='fixtures'&&isSel){cx.fillStyle='#c9a86c';cx.fillRect(br.x-5,br.y-5,10,10);}});}
+function drawSBg(){const tw=SC*SS,th=SR*SS,tl=w2c(0,0),br=w2c(tw,th);cx.fillStyle=GColor;cx.fillRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);}
+function drawSG(){cx.strokeStyle='rgba(255,255,255,.15)';cx.lineWidth=1;cx.setLineDash([4,4]);for(let c=0;c<=SC;c++){const p=w2c(c*SS,0),p2=w2c(c*SS,SR*SS);cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p2.x,p2.y);cx.stroke();}for(let r=0;r<=SR;r++){const p=w2c(0,r*SS),p2=w2c(SC*SS,r*SS);cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(p2.x,p2.y);cx.stroke();}cx.setLineDash([]);const tl=w2c(0,0),br=w2c(SC*SS,SR*SS);cx.strokeStyle='#c9a86c';cx.lineWidth=2;cx.strokeRect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);}
+function drawHx(arr){const dR=(HR-GW/2)*PPI*Z;if(dR<.2)return;arr.forEach(hex=>{const world=h2w(hex.q,hex.r),center=w2c(world.x,world.y),corners=[];for(let i=0;i<6;i++){const a=Math.PI/180*(60*i);corners.push({x:center.x+dR*Math.cos(a),y:center.y+dR*Math.sin(a)});}cx.beginPath();cx.moveTo(corners[0].x,corners[0].y);for(let i=1;i<6;i++)cx.lineTo(corners[i].x,corners[i].y);cx.closePath();if(hex.color){cx.fillStyle=hex.color;cx.fill();if(dR>3){cx.save();cx.clip();cx.strokeStyle='rgba(255,255,255,.06)';cx.lineWidth=1;cx.stroke();cx.restore();}}else{cx.fillStyle=GColor;cx.fill();}if(GW>0){cx.strokeStyle=GColor;cx.lineWidth=Math.max(GW*PPI*Z,.3);cx.stroke();}});}
+function drawBorderTiles(){
+  if(!BE||!RC)return;
+  const tiles=buildBorderTiles();
+  const sz=PPI*Z; // 1 inch in screen pixels
+  const gw=GW*PPI*Z;
+  tiles.forEach(t=>{
+    const tl=w2c(t.x,t.y);
+    const s=sz-gw;
+    if(s<.3)return;
+    if(t.color){
+      cx.fillStyle=t.color;cx.fillRect(tl.x+gw/2,tl.y+gw/2,s,s);
+      if(sz>4){cx.strokeStyle='rgba(255,255,255,.04)';cx.lineWidth=.5;cx.strokeRect(tl.x+gw/2+.5,tl.y+gw/2+.5,s-1,s-1);}
+    }else{cx.fillStyle=GColor;cx.fillRect(tl.x,tl.y,sz,sz);}
+    if(GW>0){cx.strokeStyle=GColor;cx.lineWidth=Math.max(gw,.3);cx.strokeRect(tl.x,tl.y,sz,sz);}
+  });
+}
+function updI(){const bar=document.getElementById('ib');if(P==='room')bar.innerHTML=RC?'<span>Dbl-click wall to edit</span>':'<span>Click corners · Shift=6″</span>';else if(P==='fixtures')bar.innerHTML=`<span>${FX.length} fixtures</span><span>Dbl-click edit · Toggle border badge</span>`;else if(P==='pattern')bar.innerHTML=`<span>${SH.length} sheet tiles</span><span>Paint hex field${BE?' + design border strip':''}</span>`;else bar.innerHTML=`<span>${RH.length.toLocaleString()} hex tiles</span>${BE?'<span>+ border</span>':''}<span>Zoom in for detail</span>`;}
+
+// ═══════════════════════════════════════
+// ZOOM
+// ═══════════════════════════════════════
+function zi(){Z=Math.min(Z*1.3,60);draw();}function zo(){Z=Math.max(Z/1.3,.1);draw();}function rv(){Z=1;PX=0;PY=0;draw();}
+function nudgePat(dx,dy){patOffX+=dx;patOffY+=dy;buildRP();draw();renderSB();}
+function zf(){if(RP.length<2)return;let a=Infinity,b=-Infinity,c=Infinity,d=-Infinity;RP.forEach(p=>{if(p.x<a)a=p.x;if(p.x>b)b=p.x;if(p.y<c)c=p.y;if(p.y>d)d=p.y;});const rw=(b-a)*PPI,rh=(d-c)*PPI,pad=80;Z=Math.min((cv.width-pad*2)/rw,(cv.height-pad*2)/rh,60);Z=Math.max(Z,.1);PX=-(a+b)/2*PPI*Z;PY=-(c+d)/2*PPI*Z;draw();}
+function zfSheet(){const tw=SC*SS,th=SR*SS,rw=tw*PPI,rh=th*PPI,pad=60;Z=Math.min((cv.width-pad*2)/rw,(cv.height-pad*2)/rh,60);Z=Math.max(Z,.1);PX=-tw/2*PPI*Z;PY=-th/2*PPI*Z;draw();}
+
+// ═══════════════════════════════════════
+// MOUSE
+// ═══════════════════════════════════════
+window.addEventListener('keydown',e=>{if(e.key==='Shift')SH_=true;if(e.key==='z'&&(e.ctrlKey||e.metaKey))undo();if(e.key==='Delete'&&SFX)rmFix(SFX.id);});
+window.addEventListener('keyup',e=>{if(e.key==='Shift')SH_=false;});
+cv.addEventListener('mousedown',e=>{const rect=cv.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,w=c2w(mx,my);if(e.button===1||e.button===2||(e.button===0&&e.altKey)){IP=true;PSX=e.clientX-PX;PSY=e.clientY-PY;cv.style.cursor='grabbing';return;}
+  if(P==='room'&&!RC){saveH();let sx=sn(w.x,SH_),sy=sn(w.y,SH_);const snapped=snapTo90(sx,sy);sx=snapped.x;sy=snapped.y;if(RP.length>=3){const fp=w2c(RP[0].x,RP[0].y);if(Math.sqrt((mx-fp.x)**2+(my-fp.y)**2)<15){closeRoom();return;}}RP.push({x:sx,y:sy});renderSB();draw();}
+  else if(P==='fixtures'){const f=getFxAt(w.x,w.y);if(f){SFX=f;const h=getFxH(w.x,w.y,f);if(h)RFX=f;else{DFX=f;DO={x:w.x-f.x,y:w.y-f.y};}}else SFX=null;draw();}
+  else if(P==='pattern'){IPT=true;saveH();const hex=getSHAt(mx,my);paintSH(hex);}
+  else if(P==='preview'&&SH_){isDraggingPattern=true;patDragStartX=w.x;patDragStartY=w.y;patDragOrigX=patOffX;patDragOrigY=patOffY;cv.style.cursor='move';}});
+cv.addEventListener('mousemove',e=>{const rect=cv.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,w=c2w(mx,my);if(IP){PX=e.clientX-PSX;PY=e.clientY-PSY;draw();return;}
+  if(isDraggingPattern){patOffX=patDragOrigX+(w.x-patDragStartX);patOffY=patDragOrigY+(w.y-patDragStartY);buildRP();draw();return;}
+  if(P==='room'&&!RC){let sx=sn(w.x,SH_),sy=sn(w.y,SH_);const snapped=snapTo90(sx,sy);DP={x:snapped.x,y:snapped.y};draw();if(RP.length>=3){const fp=w2c(RP[0].x,RP[0].y);cv.style.cursor=Math.sqrt((mx-fp.x)**2+(my-fp.y)**2)<15?'pointer':'crosshair';}}
+  else if(P==='fixtures'){if(DFX){DFX.x=sn(w.x-DO.x,SH_);DFX.y=sn(w.y-DO.y,SH_);draw();}else if(RFX){RFX.w=Math.max(6,sn(w.x-RFX.x,SH_));RFX.h=Math.max(6,sn(w.y-RFX.y,SH_));draw();}else{const f=getFxAt(w.x,w.y);cv.style.cursor=f?(SFX&&f.id===SFX.id&&getFxH(w.x,w.y,f)?'nwse-resize':'move'):'default';}}
+  else if(P==='pattern'&&IPT&&(CT==='paint'||CT==='erase')){const hex=getSHAt(mx,my);if(hex){if(CT==='paint')hex.color=CC;else hex.color=null;draw();}}});
+window.addEventListener('mouseup',()=>{if(DFX||RFX)renderSB();if(isDraggingPattern){isDraggingPattern=false;renderSB();}IP=false;IPT=false;DFX=null;RFX=null;});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('wheel',e=>{e.preventDefault();const rect=cv.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,f=e.deltaY<0?1.1:1/1.1,nz=Math.max(.1,Math.min(60,Z*f));PX=mx-(mx-PX)*(nz/Z);PY=my-(my-PY)*(nz/Z);Z=nz;draw();});
+cv.addEventListener('dblclick',e=>{const rect=cv.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,w=c2w(mx,my);if(P==='fixtures'||P==='room'){const f=getFxAt(w.x,w.y);if(f){editFxDim(f);return;}const wi=getWallAt(mx,my);if(wi>=0)editWall(wi);}});
+function exportImg(){const l=document.createElement('a');l.download='hex-floor.png';l.href=cv.toDataURL('image/png');l.click();}
+function resizeCV(){const a=document.getElementById('ca');cv.width=a.clientWidth;cv.height=a.clientHeight;draw();}
+window.addEventListener('resize',resizeCV);
+renderSB();resizeCV();
+</script>
+</body>
+</html>
